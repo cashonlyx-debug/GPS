@@ -65,7 +65,7 @@
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const separator = isIOS ? '&' : '?';
         smsBtn.onclick = function() {
-            window.location.href = `sms:110${separator}body=我的報案座標為：${currentLat}, ${currentLon}`;
+            window.location.href = `sms:0911510921${separator}body=我的報案座標為：${currentLat}, ${currentLon}`;
         };
     }
 
