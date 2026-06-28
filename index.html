@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>新竹縣政府警察局110報案定位</title>
+    <title>新竹縣政府警察局110報案定位 / Hsinchu County Police Bureau 110 Location Service</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f8f9fa; padding: 20px; box-sizing: border-box; }
         .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); text-align: center; width: 100%; max-width: 400px; }
-        h2 { color: #dc3545; margin-top: 0; font-size: 24px; }
-        .hint { color: #666; font-size: 15px; margin-bottom: 25px; line-height: 1.4; }
+        h2 { color: #dc3545; margin-top: 0; font-size: 24px; margin-bottom: 5px; }
+        h3 { color: #555; margin-top: 0; font-size: 16px; font-weight: normal; margin-bottom: 15px; }
+        .hint { color: #666; font-size: 14px; margin-bottom: 25px; line-height: 1.5; text-align: left; background: #f1f3f5; padding: 12px; border-radius: 10px; }
         .coord-box { background: #e9ecef; padding: 15px; border-radius: 10px; margin: 15px 0; font-size: 28px; font-weight: bold; color: #1a73e8; letter-spacing: 0.5px; word-break: break-all; }
-        .label { font-size: 14px; color: #495057; display: block; margin-bottom: 5px; font-weight: normal; }
-        button { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .label { font-size: 14px; color: #495057; display: block; margin-bottom: 5px; font-weight: bold; }
+        button { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
         .btn-copy { background-color: #0d6efd; color: white; }
         .btn-sms { background-color: #198754; color: white; display: none; }
     </style>
@@ -20,20 +21,26 @@
 
 <div class="container">
     <h2>報案定位系統</h2>
-    <p class="hint">請點選畫面的「允許/同意」分享位置。<br>定位成功後，請將下方數字告知警方，或點擊按鈕回傳。</p>
+    <h3>Report Location System</h3>
+    
+    <div class="hint">
+        請點選畫面的「允許/同意」分享位置。<br>定位成功後，請將下方數字告知警方，或點擊按鈕回傳。<br>
+        <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 8px 0;">
+        Please click "Allow/Agree" to share your location.<br>Once located, report the numbers below to the police or click the button to send via SMS.
+    </div>
     
     <div class="coord-box">
         <span class="label">緯度 (Latitude)</span>
-        <span id="lat">取得中...</span>
+        <span id="lat">取得中... / Loading...</span>
     </div>
     
     <div class="coord-box">
         <span class="label">經度 (Longitude)</span>
-        <span id="lon">取得中...</span>
+        <span id="lon">取得中... / Loading...</span>
     </div>
 
-    <button class="btn-copy" id="copyBtn" onclick="copyCoords()">📋 複製座標數字</button>
-    <button class="btn-sms" id="smsBtn">💬 一鍵簡訊回傳</button>
+    <button class="btn-copy" id="copyBtn" onclick="copyCoords()">📋 複製座標數字 / Copy Coordinates</button>
+    <button class="btn-sms" id="smsBtn">💬 一鍵簡訊回傳 / Send via SMS</button>
 </div>
 
 <script>
@@ -47,7 +54,7 @@
             maximumAge: 0
         });
     } else {
-        alert("您的手機不支援此定位方式");
+        alert("您的手機不支援此定位方式。\nYour device does not support this location method.");
     }
 
     function success(position) {
@@ -63,21 +70,21 @@
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const separator = isIOS ? '&' : '?';
         smsBtn.onclick = function() {
-            window.location.href = `sms:0911510921${separator}body=我的報案座標為：${currentLat}, ${currentLon}`;
+            window.location.href = `sms:0911510921${separator}body=My coordinates / 我的報案座標：${currentLat}, ${currentLon}`;
         };
     }
 
     function error(err) {
-        document.getElementById('lat').innerText = "定位失敗";
-        document.getElementById('lon').innerText = "請檢查定位開關";
-        alert("請確保手機已開啟 GPS，並「允許」網頁存取位置資訊。");
+        document.getElementById('lat').innerText = "定位失敗 / Failed";
+        document.getElementById('lon').innerText = "檢查定位開關 / Check GPS";
+        alert("請確保手機已開啟 GPS，並「允許」網頁存取位置資訊。\nPlease ensure GPS is enabled and allow the webpage to access your location.");
     }
 
     function copyCoords() {
-        if(!currentLat) return alert("尚未取得座標");
+        if(!currentLat) return alert("尚未取得座標 / Coordinates not found yet");
         const text = `${currentLat}, ${currentLon}`;
         navigator.clipboard.writeText(text).then(() => {
-            alert("座標已複製：" + text);
+            alert("座標已複製 / Coordinates copied:\n" + text);
         }).catch(() => {
             // 備用複製機制
             const dummy = document.createElement("textarea");
@@ -86,7 +93,7 @@
             dummy.select();
             document.execCommand("copy");
             document.body.removeChild(dummy);
-            alert("座標已複製：" + text);
+            alert("座標已複製 / Coordinates copied:\n" + text);
         });
     }
 </script>
