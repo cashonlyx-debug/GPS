@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>新竹縣政府警察局110報案定位 / Hsinchu County Police Bureau 110 Location Service</title>
+    <script>
+        
+        if (/Line/i.test(navigator.userAgent)) {
+            var url = window.location.href;
+            if (url.indexOf('?') > -1) {
+                url += '&openExternalBrowser=1';
+            } else {
+                url += '?openExternalBrowser=1';
+            }
+            window.location.href = url;
+        }
+    </script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f8f9fa; padding: 20px; box-sizing: border-box; }
         .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); text-align: center; width: 100%; max-width: 400px; }
