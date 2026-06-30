@@ -4,29 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>新竹縣政府警察局110報案定位 / Hsinchu County Police Bureau 110 Location Service</title>
-    <script>
-        
-        if (/Line/i.test(navigator.userAgent)) {
-            var url = window.location.href;
-            if (url.indexOf('?') > -1) {
-                url += '&openExternalBrowser=1';
-            } else {
-                url += '?openExternalBrowser=1';
-            }
-            window.location.href = url;
-        }
-    </script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f8f9fa; padding: 20px; box-sizing: border-box; }
         .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); text-align: center; width: 100%; max-width: 400px; }
         h2 { color: #dc3545; margin-top: 0; font-size: 24px; margin-bottom: 5px; }
         h3 { color: #555; margin-top: 0; font-size: 16px; font-weight: normal; margin-bottom: 15px; }
+        
+        /* 增加 LINE 警示區塊樣式 */
+        #lineWarning { display: none; background-color: #fff3f3; color: #d63031; border: 2px solid #ff7675; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: left; font-size: 14px; font-weight: bold; }
+        
         .hint { color: #666; font-size: 14px; margin-bottom: 25px; line-height: 1.5; text-align: left; background: #f1f3f5; padding: 12px; border-radius: 10px; }
         .coord-box { background: #e9ecef; padding: 15px; border-radius: 10px; margin: 15px 0; font-size: 28px; font-weight: bold; color: #1a73e8; letter-spacing: 0.5px; word-break: break-all; }
         .label { font-size: 14px; color: #495057; display: block; margin-bottom: 5px; font-weight: bold; }
         button { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
         .btn-copy { background-color: #0d6efd; color: white; }
         .btn-sms { background-color: #198754; color: white; display: none; }
+        
+        /* LINE 專用按鈕樣式 */
+        .btn-line-fix { display: none; background-color: #d63031 !important; color: white !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(214, 48, 49, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(214, 48, 49, 0); } 100% { box-shadow: 0 0 0 0 rgba(214, 48, 49, 0); } }
     </style>
 </head>
 <body>
@@ -35,7 +31,14 @@
     <h2>報案定位系統</h2>
     <h3>Report Location System</h3>
     
-    <div class="hint">
+    <!-- LINE 專用警示區塊 -->
+    <div id="lineWarning">
+        ⚠️ ⚠️ ⚠️<br>
+        為了精準定位，請點選螢幕<strong>右上角「...」</strong>，選擇<strong>「用 Safari/瀏覽器 開啟」</strong>。<br><br>
+        For precise location, please click <strong>"..." on the top right</strong> and select <strong>"Open in Safari/Browser"</strong>.
+    </div>
+
+    <div class="hint" id="normalHint">
         請點選畫面的「允許/同意」分享位置。<br>定位成功後，請將下方數字告知警方，或點擊按鈕回傳。<br>
         <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 8px 0;">
         Please click "Allow/Agree" to share your location.<br>Once located, report the numbers below to the police or click the button to send via SMS.
@@ -58,15 +61,40 @@
 <script>
     let currentLat = "";
     let currentLon = "";
+    let isLine = /Line/i.test(navigator.userAgent); // 偵測是否為 LINE 瀏覽器
 
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(success, error, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        });
+    
+    if (isLine) {
+        // 1. 自動強制跳轉（依然保留，能跳就跳）
+        var url = window.location.href;
+        if (url.indexOf('?') > -1) {
+            url += '&openExternalBrowser=1';
+        } else {
+            url += '?openExternalBrowser=1';
+        }
+        window.location.href = url;
+
+        
+        document.getElementById('lineWarning').style.display = 'block'; // 顯示警告
+        document.getElementById('normalHint').style.display = 'none'; // 隱藏原本說明
+        document.getElementById('copyBtn').className = 'btn-line-fix'; // 按鈕變紅色脈衝警告
+        document.getElementById('copyBtn').innerHTML = '⚠️ 請切換至瀏覽器開啟 ⚠️<br>Open in Browser';
+        document.getElementById('lat').innerText = '請跳轉... / Please Switch';
+        document.getElementById('lon').innerText = '請跳轉... / Please Switch';
+        
+        
+        alert("⚠️ 重要：請按右上角「...」，選擇「用瀏覽器開啟」以獲取準確位置。\nImportant: Click \"...\" on top right and select \"Open in Browser\" for accurate location.");
     } else {
-        alert("您的手機不支援此定位方式。\nYour device does not support this location method.");
+        
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(success, error, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        } else {
+            alert("您的手機不支援此定位方式。\nYour device does not support this location method.");
+        }
     }
 
     function success(position) {
@@ -87,12 +115,19 @@
     }
 
     function error(err) {
-        document.getElementById('lat').innerText = "定位失敗 / Failed";
-        document.getElementById('lon').innerText = "檢查定位開關 / Check GPS";
-        alert("請確保手機已開啟 GPS，並「允許」網頁存取位置資訊。\nPlease ensure GPS is enabled and allow the webpage to access your location.");
+        // 只有在非 LINE 瀏覽器下定位失敗才警示
+        if (!isLine) {
+            document.getElementById('lat').innerText = "定位失敗 / Failed";
+            document.getElementById('lon').innerText = "檢查定位開關 / Check GPS";
+            alert("請確保手機已開啟 GPS，並「允許」網頁存取位置資訊。\nPlease ensure GPS is enabled and allow the webpage to access your location.");
+        }
     }
 
     function copyCoords() {
+        if (isLine) {
+            alert("⚠️ 請先切換至瀏覽器開啟網頁。\n⚠️ Please open in Browser first.");
+            return;
+        }
         if(!currentLat) return alert("尚未取得座標 / Coordinates not found yet");
         const text = `${currentLat}, ${currentLon}`;
         navigator.clipboard.writeText(text).then(() => {
